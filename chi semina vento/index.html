@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mystic Garden - Intense Heat Waves</title>
+<style>
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #fff; font-family: sans-serif; }
+    .scene { position: relative; width: 100%; height: 100%; overflow: hidden; }
+
+    /* SFONDO */
+    .canvas { position: absolute; width: 100%; height: 100%; filter: blur(60px) saturate(160%); z-index: 1; pointer-events: none; }
+    .color-mass { position: absolute; width: 100vmax; height: 100vmax; border-radius: 50%; mix-blend-mode: multiply; opacity: 0.7; animation: activeMorph 15s infinite alternate ease-in-out; }
+    .blue { background: #a2d2ff; top: -30%; left: -20%; }
+    .pink { background: #ffafcc; top: -10%; right: -30%; }
+    .yellow { background: #ffefae; bottom: -20%; left: 0%; }
+    .purple { background: #cdb4db; bottom: -10%; right: -10%; }
+
+    @keyframes activeMorph {
+        0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        100% { transform: translate(-5%, 10%) scale(0.9) rotate(90deg); }
+    }
+
+    /* SOLE */
+    .sun-container {
+        position: absolute; top: -350px; left: 50%; transform: translateX(-50%);
+        width: 350px; height: 350px; z-index: 5;
+        transition: top 5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+    }
+    .sun-container.reveal { top: 5%; }
+
+    .sun-core {
+        position: absolute; top: 50%; left: 50%; width: 150px; height: 150px;
+        background: radial-gradient(circle, #ffbd00 0%, #ff5400 60%, #ff0054 100%);
+        border-radius: 50%; transform: translate(-50%, -50%);
+        filter: blur(15px); box-shadow: 0 0 60px rgba(255, 84, 0, 0.8);
+        animation: sunPulse 8s infinite ease-in-out;
+        z-index: 6;
+    }
+
+    .sun-rays {
+        position: absolute; top: 50%; left: 50%; width: 280px; height: 280px;
+        background: repeating-conic-gradient(from 0deg, rgba(255, 189, 0, 0.4) 0deg 15deg, transparent 15deg 30deg);
+        border-radius: 50%; transform: translate(-50%, -50%);
+        filter: blur(25px); animation: sunRotate 25s linear infinite;
+    }
+
+    /* --- ONDE DI CALORE INTENSE --- */
+    .heat-waves {
+        position: absolute; top: 50%; left: 50%;
+        width: 100%; height: 100%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 2s ease-in;
+    }
+    .sun-container.active-heat .heat-waves { opacity: 1; }
+
+    .heat-wave {
+        position: absolute; top: 50%; left: 50%;
+        width: 180px; height: 180px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        /* Gradiente molto più saturo e visibile */
+        background: radial-gradient(circle, transparent 30%, rgba(255, 189, 0, 0.4) 50%, rgba(255, 0, 84, 0.2) 70%, transparent 100%);
+        /* "Filo" di luce per definire l'onda */
+        border: 2px solid rgba(255, 239, 174, 0.3);
+        filter: blur(12px) saturate(200%);
+        animation: heatSpread 5s infinite ease-out;
+    }
+
+    .wave-2 { animation-delay: 1.25s; }
+    .wave-3 { animation-delay: 2.5s; }
+    .wave-4 { animation-delay: 3.75s; }
+
+    @keyframes heatSpread {
+        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+        20% { opacity: 1; }
+        100% { 
+            transform: translate(-50%, -30%) scale(6); /* Si espande verso la piantina */
+            opacity: 0; 
+            filter: blur(30px) saturate(100%);
+        }
+    }
+
+    @keyframes sunPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+    @keyframes sunRotate { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* LAVA LAMP */
+    .lava-lamp-container { position: absolute; width: 100%; height: 100%; bottom: 0; z-index: 10; filter: url('#goo'); pointer-events: none; }
+    .mystic-blob { background: rgba(255, 255, 255, 0.5); position: absolute; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); }
+
+    .ground-visual { 
+        bottom: -15%; left: 50%; transform: translateX(-50%); 
+        width: 130%; height: 40%; border-radius: 50% 50% 0 0; 
+        z-index: 20; pointer-events: auto; cursor: pointer; 
+    }
+
+    .lava-bubble { bottom: 15%; opacity: 0; transition: all 5s ease-out; border-radius: 50%; }
+    .is-planted .lava-bubble { opacity: 0.9 !important; }
+    .b1 { width: 350px; height: 300px; left: -5%; }
+    .b2 { width: 400px; height: 350px; left: 22%; }
+    .b3 { width: 450px; height: 320px; right: 8%; }
+    .b4 { width: 300px; height: 280px; right: -5%; }
+
+    .is-planted .b1 { bottom: 85%; }
+    .is-planted .b2 { bottom: 78%; }
+    .is-planted .b3 { bottom: 82%; }
+    .is-planted .b4 { bottom: 72%; }
+
+    .lava-bubble.fly-away {
+        left: -130% !important; opacity: 0 !important;
+        transition: left 9s cubic-bezier(0.45, 0.05, 0.55, 0.95), opacity 7s ease-in;
+    }
+
+    /* SEME */
+    .seed { position: absolute; width: 14px; height: 20px; background: #4a3728; border-radius: 50% 50% 50% 50%/80% 80% 30% 30%; z-index: 2000; opacity: 0; pointer-events: none; }
+    .seed-fall { opacity: 1; animation: seedFalling 1s forwards; }
+    @keyframes seedFalling {
+        0% { transform: translate(-50%, -50%) scale(0); top: 50%; left: 50%; }
+        100% { transform: translate(-50%, -100%) scale(1); top: var(--target-y); left: var(--target-x); }
+    }
+
+    /* PIANTINA */
+    .plant-holder { position: absolute; z-index: 28; pointer-events: none; }
+    .plant-stem {
+        position: absolute; bottom: 0; left: -3px; width: 6px; height: 0;
+        background: #74c69d; border-radius: 6px; transform-origin: bottom center;
+        transition: height 3.5s cubic-bezier(0.4, 0, 0.2, 1), transform 6s ease-in-out;
+    }
+    .is-growing .plant-stem { height: 130px; animation: windSway 4s infinite ease-in-out 3.5s; }
+
+    /* Vento Graduale */
+    .wind-gentle .plant-stem { transform: rotate(-5deg); }
+    .wind-med .plant-stem { transform: rotate(-15deg); animation: strongWind 2s infinite ease-in-out !important; }
+    .wind-high .plant-stem { transform: rotate(-25deg); animation: strongWind 1s infinite ease-in-out !important; }
+
+    @keyframes windSway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+    @keyframes strongWind { 0%, 100% { transform: rotate(-19deg); } 50% { transform: rotate(-24deg); } }
+
+    .plant-leaves {
+        position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) scale(0);
+        display: flex; gap: 4px; transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 3s;
+        margin-bottom: -12px;
+    }
+    .plant-leaf {
+        width: 44px; height: 34px; background: #95d5b2; border: 2px solid #52b788;
+        border-radius: 100% 100% 40% 60% / 100% 100% 40% 60%;
+        position: relative; animation: leafMove 6s infinite ease-in-out;
+    }
+    .plant-leaf::after {
+        content: ''; position: absolute; width: 8px; height: 6px; 
+        background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 80%);
+        border-radius: 50%; bottom: 6px; left: 8px; filter: blur(1px);
+    }
+    .plant-leaf.right::after { left: auto; right: 8px; }
+
+    @keyframes leafMove { 0%, 100% { transform: rotate(var(--rot)); } 50% { transform: rotate(calc(var(--rot) + 8deg)) translateY(-1px); } }
+    .is-growing .plant-leaves { transform: translateX(-50%) scale(1); }
+
+    /* PIOGGIA */
+    #rain-container { position: absolute; width: 100%; height: 100%; top: 0; z-index: 12; opacity: 0; pointer-events: none; transition: opacity 3s; }
+    .drop { position: absolute; width: 1px; height: 60px; background: rgba(255,255,255,0.25); animation: rainFall 1.2s linear infinite; }
+    @keyframes rainFall { to { transform: translateY(110vh); } }
+
+    svg { position: absolute; width: 0; height: 0; }
+</style>
+</head>
+<body>
+
+<div class="scene" id="mainScene">
+    <div class="canvas">
+        <div class="color-mass blue"></div><div class="color-mass pink"></div>
+        <div class="color-mass yellow"></div><div class="color-mass purple"></div>
+    </div>
+
+    <div id="sunContainer" class="sun-container">
+        <div class="sun-rays"></div>
+        <div class="sun-core"></div>
+        <div class="heat-waves">
+            <div class="heat-wave wave-1"></div>
+            <div class="heat-wave wave-2"></div>
+            <div class="heat-wave wave-3"></div>
+            <div class="heat-wave wave-4"></div>
+        </div>
+    </div>
+
+    <div class="lava-lamp-container">
+        <div class="lava-bubble b1 mystic-blob"></div>
+        <div class="lava-bubble b2 mystic-blob"></div>
+        <div class="lava-bubble b3 mystic-blob"></div>
+        <div class="lava-bubble b4 mystic-blob"></div>
+        <div class="ground-visual mystic-blob" id="ground"></div>
+    </div>
+
+    <div id="seed" class="seed"></div>
+    <div id="rain-container"></div>
+</div>
+
+<svg>
+    <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -12" />
+    </filter>
+</svg>
+
+<script>
+    const ground = document.getElementById('ground');
+    const seed = document.getElementById('seed');
+    const rainContainer = document.getElementById('rain-container');
+    const sunContainer = document.getElementById('sunContainer');
+    const scene = document.getElementById('mainScene');
+
+    let step = 0;
+    let targetX = 0, targetY = 0;
+    let plantRef = null;
+
+    ground.addEventListener('click', (e) => {
+        if (step > 3) return;
+
+        if (step === 0) { // SCAVO
+            targetX = e.clientX; targetY = e.clientY;
+            const hole = document.createElement('div');
+            hole.style.cssText = `position:absolute; left:${targetX}px; top:${targetY}px; width:80px; height:20px; background:rgba(0,0,0,0.08); border-radius:50%; z-index:5; transform:translate(-50%,-50%);`;
+            scene.appendChild(hole);
+            step = 1;
+        } 
+        else if (step === 1) { // SEMINA
+            scene.classList.add('is-planted');
+            seed.style.setProperty('--target-x', targetX + 'px');
+            seed.style.setProperty('--target-y', targetY + 'px');
+            seed.classList.add('seed-fall');
+            
+            setTimeout(() => {
+                seed.style.opacity = "0";
+                const mound = document.createElement('div');
+                mound.style.cssText = `position:absolute; left:${targetX}px; top:${targetY}px; width:100px; height:25px; background:rgba(255,255,255,0.4); border-radius:50% 50% 0 0; z-index:26; transform:translate(-50%, -10px);`;
+                scene.appendChild(mound);
+            }, 1000);
+            step = 2;
+        }
+        else if (step === 2) { // PIOGGIA
+            rainContainer.style.opacity = "1";
+            for(let i=0; i<35; i++) {
+                const d = document.createElement('div');
+                d.className = 'drop';
+                d.style.left = Math.random() * 100 + '%';
+                d.style.animationDelay = Math.random() * 1.5 + 's';
+                rainContainer.appendChild(d);
+            }
+            setTimeout(spawnSprout, 2000);
+            step = 3;
+        }
+        else if (step === 3) { // VENTO E SOLE
+            rainContainer.style.opacity = "0";
+            if(plantRef) plantRef.classList.add('wind-gentle');
+            document.querySelectorAll('.lava-bubble').forEach(b => b.classList.add('fly-away'));
+
+            setTimeout(() => { if(plantRef) plantRef.classList.replace('wind-gentle', 'wind-med'); }, 2500);
+            setTimeout(() => { if(plantRef) plantRef.classList.replace('wind-med', 'wind-high'); }, 5500);
+            setTimeout(() => { 
+                if(plantRef) {
+                    plantRef.classList.remove('wind-high');
+                    plantRef.classList.add('wind-gentle');
+                }
+            }, 8000);
+
+            setTimeout(() => {
+                if(plantRef) plantRef.classList.remove('wind-gentle');
+                sunContainer.classList.add('reveal'); 
+                rainContainer.innerHTML = '';
+                
+                setTimeout(() => {
+                    sunContainer.classList.add('active-heat');
+                }, 2000);
+                
+            }, 9500);
+            step = 4;
+        }
+    });
+
+    function spawnSprout() {
+        const holder = document.createElement('div');
+        holder.className = 'plant-holder';
+        holder.style.left = targetX + 'px';
+        holder.style.top = targetY + 'px';
+        holder.innerHTML = `
+            <div class="plant-stem">
+                <div class="plant-leaves">
+                    <div class="plant-leaf" style="--rot:-35deg"></div>
+                    <div class="plant-leaf right" style="--rot:35deg"></div>
+                </div>
+            </div>`;
+        plantRef = holder;
+        scene.appendChild(holder);
+        setTimeout(() => holder.classList.add('is-growing'), 50);
+    }
+</script>
+</body>
+</html>
